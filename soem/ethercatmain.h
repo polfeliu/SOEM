@@ -226,7 +226,9 @@ typedef struct ec_slave
    /** Boolean for tracking whether the slave is (not) responding, not used/set by the SOEM library */
    boolean          islost;
    /** registered configuration function PO->SO */
-   int              (*PO2SOconfig)(uint16 slave);
+   int              (*PO2SOconfig)(uint16 slave, void* user);
+   /** user data for PO2SOconfig */
+   void*            user;
    /** readable name */
    char             name[EC_MAXNAME + 1];
 } ec_slavet;
