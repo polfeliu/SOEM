@@ -51,7 +51,7 @@ enum
 {
    /** No redundancy, single NIC mode */
    ECT_RED_NONE,
-   /** Double redundant NIC connecetion */
+   /** Double redundant NIC connection */
    ECT_RED_DOUBLE
 };
 
@@ -262,8 +262,8 @@ int ecx_outframe(ecx_portt *port, int idx, int stacknumber)
       stack = &(port->redport->stack);
    }
    lp = (*stack->txbuflength)[idx];
-   rval = bfin_EMAC_send((*stack->txbuf)[idx], lp);
    (*stack->rxbufstat)[idx] = EC_BUF_TX;
+   rval = bfin_EMAC_send((*stack->txbuf)[idx], lp);
 
    return rval;
 }
@@ -298,9 +298,9 @@ int ecx_outframe_red(ecx_portt *port, int idx)
       //send(sockhandle2, &ec_txbuf2, ec_txbuflength2 , 0);
       // OBS! redundant not ACTIVE for BFIN, just added to compile
       ASSERT (0);
+      port->redport->rxbufstat[idx] = EC_BUF_TX;
       bfin_EMAC_send(&(port->txbuf2), port->txbuflength2);
       mtx_unlock (port->tx_mutex);
-      port->redport->rxbufstat[idx] = EC_BUF_TX;
    }
 
    return rval;
@@ -334,7 +334,7 @@ static int ecx_recvpkt(ecx_portt *port, int stacknumber)
 /** Non blocking receive frame function. Uses RX buffer and index to combine
  * read frame with transmitted frame. To compensate for received frames that
  * are out-of-order all frames are stored in their respective indexed buffer.
- * If a frame was placed in the buffer previously, the function retreives it
+ * If a frame was placed in the buffer previously, the function retrieves it
  * from that buffer index without calling ec_recvpkt. If the requested index
  * is not already in the buffer it calls ec_recvpkt to fetch it. There are
  * three options now, 1 no frame read, so exit. 2 frame read but other
@@ -390,7 +390,7 @@ int ecx_inframe(ecx_portt *port, int idx, int stacknumber)
             ecp =(ec_comt*)(&(*stack->tempbuf)[ETH_HEADERSIZE]);
             l = etohs(ecp->elength) & 0x0fff;
             idxf = ecp->index;
-            /* found index equals reqested index ? */
+            /* found index equals requested index ? */
             if (idxf == idx)
             {
                /* yes, put it in the buffer array (strip ethernet header) */
@@ -416,7 +416,7 @@ int ecx_inframe(ecx_portt *port, int idx, int stacknumber)
                }
                else
                {
-                  /* strange things happend */
+                  /* strange things happened */
                }
             }
          }
@@ -425,7 +425,7 @@ int ecx_inframe(ecx_portt *port, int idx, int stacknumber)
 
    }
 
-   /* WKC if mathing frame found */
+   /* WKC if matching frame found */
    return rval;
 }
 
@@ -471,13 +471,13 @@ static int ecx_waitinframe_red(ecx_portt *port, int idx, osal_timert timer)
    /* only do redundant functions when in redundant mode */
    if (port->redstate != ECT_RED_NONE)
    {
-      /* primrx if the reveived MAC source on primary socket */
+      /* primrx if the received MAC source on primary socket */
       primrx = 0;
       if (wkc > EC_NOFRAME)
       {
          primrx = port->rxsa[idx];
       }
-      /* secrx if the reveived MAC source on psecondary socket */
+      /* secrx if the received MAC source on psecondary socket */
       secrx = 0;
       if (wkc2 > EC_NOFRAME)
       {
@@ -541,16 +541,11 @@ int ecx_waitinframe(ecx_portt *port, int idx, int timeout)
 
    osal_timer_start (&timer, timeout);
    wkc = ecx_waitinframe_red(port, idx, timer);
-   /* if nothing received, clear buffer index status so it can be used again */
-   if (wkc <= EC_NOFRAME)
-   {
-      ecx_setbufstat(port, idx, EC_BUF_EMPTY);
-   }
 
    return wkc;
 }
 
-/** Blocking send and recieve frame function. Used for non processdata frames.
+/** Blocking send and receive frame function. Used for non processdata frames.
  * A datagram is build into a frame and transmitted via this function. It waits
  * for an answer and returns the workcounter. The function retries if time is
  * left and the result is WKC=0 or no frame received.
@@ -579,11 +574,6 @@ int ecx_srconfirm(ecx_portt *port, int idx, int timeout)
       wkc = ecx_waitinframe_red(port, idx, read_timer);
    /* wait for answer with WKC>0 or otherwise retry until timeout */
    } while ((wkc <= EC_NOFRAME) && (osal_timer_is_expired(&timer) == FALSE));
-   /* if nothing received, clear buffer index status so it can be used again */
-   if (wkc <= EC_NOFRAME)
-   {
-      ecx_setbufstat(port, idx, EC_BUF_EMPTY);
-   }
 
    return wkc;
 }

@@ -42,7 +42,6 @@ ec_adaptert * oshw_find_adapters (void)
    ec_adaptert * prev_adapter;
    ec_adaptert * ret_adapter = NULL;
    char errbuf[PCAP_ERRBUF_SIZE];
-   size_t string_len;
 
    /* find all devices */
    if (pcap_findalldevs(&alldevs, errbuf) == -1)
@@ -51,7 +50,7 @@ ec_adaptert * oshw_find_adapters (void)
       return (NULL);
    }
    /* Iterate all devices and create a local copy holding the name and
-    * decsription.
+    * description.
     */
    for(d= alldevs; d != NULL; d= d->next)
    {
@@ -69,17 +68,12 @@ ec_adaptert * oshw_find_adapters (void)
          ret_adapter = adapter;
       }
 
-      /* fetch description and name of the divice from libpcap */
+      /* fetch description and name of the device from libpcap */
       adapter->next = NULL;
       if (d->name)
       {
-         string_len = strlen(d->name);
-         if (string_len > (EC_MAXLEN_ADAPTERNAME - 1))
-         {
-            string_len = EC_MAXLEN_ADAPTERNAME - 1;
-         }
-         strncpy(adapter->name, d->name,string_len);
-         adapter->name[string_len] = '\0';
+         strncpy(adapter->name, d->name, EC_MAXLEN_ADAPTERNAME);
+         adapter->name[EC_MAXLEN_ADAPTERNAME-1] = '\0';
       }
       else
       {
@@ -87,13 +81,8 @@ ec_adaptert * oshw_find_adapters (void)
       }
       if (d->description)
       {
-         string_len = strlen(d->description);
-         if (string_len > (EC_MAXLEN_ADAPTERNAME - 1))
-         {
-            string_len = EC_MAXLEN_ADAPTERNAME - 1;
-         }
-         strncpy(adapter->desc, d->description,string_len);
-         adapter->desc[string_len] = '\0';
+         strncpy(adapter->desc, d->description, EC_MAXLEN_ADAPTERNAME);
+         adapter->desc[EC_MAXLEN_ADAPTERNAME-1] = '\0';
       }
       else
       {
@@ -115,7 +104,7 @@ ec_adaptert * oshw_find_adapters (void)
 void oshw_free_adapters (ec_adaptert * adapter)
 {
    ec_adaptert * next_adapter;
-   /* Iterate the linked list and free all elemnts holding
+   /* Iterate the linked list and free all elements holding
     * adapter information
     */
    if(adapter)
