@@ -139,7 +139,7 @@ void simpletest(char *ifname)
     }
     else
     {
-        printf("No socket connection on %s\nExcecute as root\n",ifname);
+        printf("No socket connection on %s\nExecute as root\n",ifname);
     }
 }
 
@@ -234,7 +234,17 @@ int main(int argc, char *argv[])
    }
    else
    {
+      ec_adaptert * adapter = NULL;
       printf("Usage: simple_test ifname1\nifname = eth0 for example\n");
+
+      printf ("\nAvailable adapters:\n");
+      adapter = ec_find_adapters ();
+      while (adapter != NULL)
+      {
+         printf ("    - %s  (%s)\n", adapter->name, adapter->desc);
+         adapter = adapter->next;
+      }
+      ec_free_adapters(adapter);
    }
 
    printf("End program\n");
